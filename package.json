@@ -1,0 +1,36 @@
+{
+  "name": "promise-shortly",
+  "version": "1.0.0",
+  "description": "Return a promise to resolve \"shortly\", based on rate limiting and a priority queue",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha test.js"
+  },
+  "author": "Kris Reeves",
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/myndzi/promise-shortly.git"
+  },
+  "keywords": [
+    "promise",
+    "rate",
+    "limit",
+    "priority",
+    "queue"
+  ],
+  "bugs": {
+    "url": "https://github.com/myndzi/promise-shortly/issues"
+  },
+  "homepage": "https://github.com/myndzi/promise-shortly#readme",
+  "dependencies": {
+    "heap": "^0.2.6",
+    "simple-token-bucket": "^1.0.0"
+  },
+  "devDependencies": {
+    "bluebird": "^3.4.7",
+    "mocha": "^3.2.0",
+    "should": "^11.1.2",
+    "sinon": "^1.17.6"
+  }
+}
