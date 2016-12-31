@@ -14,7 +14,7 @@ var wait = new Shortly({
 	capacity: 10,
     fillQuantity: 1,
     fillTime: 1000,
-    initialCapacity: 0
+    initialCapacity: 1
 }, Bluebird).wait;
 
 var start = Date.now();
@@ -22,19 +22,24 @@ function numSeconds() {
 	return Math.round((Date.now() - start) / 1000);
 }
 
-wait(0, 3).then(function () {
-	console.log('low priority, completed in '+numSeconds()+'s');
+wait().then(function () {
+    console.log('default, completed after '+numSeconds()+'s');
 });
 
-wait(10, 3).then(function () {
-	console.log('high priority, completed in '+numSeconds()+'s');
+wait(0, 3).then(function () {
+	console.log('low priority, completed after '+numSeconds()+'s');
+});
+
+wait(10, 1).then(function () {
+	console.log('high priority, completed after '+numSeconds()+'s');
 });
 ```
 
 Output:
 ```
-high priority, completed in 3s
-low priority, completed in 6s
+default, completed after 0s
+high priority, completed after 1s
+low priority, completed after 4s
 ```
 
 ## API
