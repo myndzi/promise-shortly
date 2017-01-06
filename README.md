@@ -2,7 +2,7 @@
 
 Install:
 ```
-$ npm install --save promise-shortrly
+$ npm install --save promise-shortly
 ```
 
 Example:
