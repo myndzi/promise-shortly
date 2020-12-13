@@ -23,14 +23,15 @@
     "url": "https://github.com/myndzi/promise-shortly/issues"
   },
   "homepage": "https://github.com/myndzi/promise-shortly#readme",
-  "dependencies": {
-    "heap": "^0.2.6",
-    "simple-token-bucket": "^1.0.0"
-  },
   "devDependencies": {
-    "bluebird": "^3.4.7",
-    "mocha": "^3.2.0",
-    "should": "^11.1.2",
-    "sinon": "^1.17.6"
+    "bluebird": "^3.7.2",
+    "mocha": "^8.2.1",
+    "should": "^13.2.3",
+    "sinon": "^9.2.2"
+  },
+  "dependencies": {
+    "create-error": "^0.3.1",
+    "priority-deque": "^1.0.4",
+    "simple-token-bucket": "^1.0.0"
   }
 }
