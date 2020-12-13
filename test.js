@@ -24,9 +24,12 @@ describe('Shortly', function () {
         it('should accept a custom Promise constructor', function (done) {
             new Shortly(OPTS, function () { done(); }).wait();
         });
+        it('should accept a custom Promise constructor as an options object', function (done) {
+            new Shortly(OPTS, { Promise: function () { done(); } }).wait();
+        });
         it('should throw if Promise is not a function', function () {
             (function () {
-                new Shortly(OPTS, 'foo');
+                new Shortly(OPTS, {Promise: 'foo'});
             }).should.throw(TypeError, /Promise is not a function/);
         });
     });
@@ -212,6 +215,52 @@ describe('Shortly', function () {
                     clock.tick(10000);
                 });
             });
+        });
+    });
+
+    describe('with limit option', function () {
+        this.timeout(50);
+        var clock;
+
+        before(function () { clock = sinon.useFakeTimers(); });
+        after(function () { clock.restore(); });
+
+        it('should reject lowest-priority item when limit is exceeded (1)', function (done) {
+            var wait = new Shortly({
+                capacity: 1,
+                fillQuantity: 1,
+                fillTime: 1000,
+                initialCapacity: 0
+            }, {
+                Promise: Bluebird,
+                limit: 1
+            }).wait;
+
+            Promise.all([
+                wait(0).should.be.rejectedWith(Shortly.OverflowError),
+                wait(100).should.be.resolved(),
+            ]).then(function () { done(); }).catch(done);
+
+            clock.tick(1000);
+        });
+
+        it('should reject lowest-priority item when limit is exceeded (1)', function (done) {
+            var wait = new Shortly({
+                capacity: 1,
+                fillQuantity: 1,
+                fillTime: 1000,
+                initialCapacity: 0
+            }, {
+                Promise: Bluebird,
+                limit: 1
+            }).wait;
+
+            Promise.all([
+                wait(100).should.be.resolved(),
+                wait(0).should.be.rejectedWith(Shortly.OverflowError),
+            ]).then(function () { done(); }).catch(done);
+
+            clock.tick(1000);
         });
     });
 });
