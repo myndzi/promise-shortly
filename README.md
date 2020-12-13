@@ -8,44 +8,54 @@ $ npm install --save promise-shortly
 Example:
 ```js
 var Shortly = require('promise-shortly'),
-	Bluebird = require('bluebird');
+    Bluebird = require('bluebird');
 
 var wait = new Shortly({
-	capacity: 10,
+    capacity: 10,
     fillQuantity: 1,
     fillTime: 1000,
     initialCapacity: 1
-}, Bluebird).wait;
+}, {
+    Promise: Bluebird,
+    limit: 2
+}).wait;
 
 var start = Date.now();
 function numSeconds() {
-	return Math.round((Date.now() - start) / 1000);
+    return Math.round((Date.now() - start) / 1000);
 }
 
 wait().then(function () {
     console.log('default, completed after '+numSeconds()+'s');
 });
 
-wait(0, 3).then(function () {
-	console.log('low priority, completed after '+numSeconds()+'s');
+wait(0, 3).catch(function () {
+    console.log('low priority, rejected (over limit)');
+});
+
+wait(5, 3).then(function () {
+    console.log('middle priority, completed after '+numSeconds()+'s');
 });
 
 wait(10, 1).then(function () {
-	console.log('high priority, completed after '+numSeconds()+'s');
+    console.log('high priority, completed after '+numSeconds()+'s');
 });
 ```
 
 Output:
 ```
 default, completed after 0s
+low priority, rejected (over limit)
 high priority, completed after 1s
-low priority, completed after 4s
+middle priority, completed after 4s
 ```
 
 ## API
 
 ### Constructor
-`new Shortly(tokenBucketOptions[, PromiseImplementation])`
+`new Shortly(tokenBucketOptions[, shortlyOptions])`
+
+#### tokenBucketOptions
 Options for the token bucket are passed directly to [simple-token-bucket#options](https://www.npmjs.com/package/simple-token-bucket#options), so this document is not authoritative, but I will list the current options here for convenience:
 
 * **capacity**: the capacity of the token bucket, aka burstiness
@@ -54,6 +64,10 @@ Options for the token bucket are passed directly to [simple-token-bucket#options
 * **initialCapacity**: the bucket initializes to max capacity by default, but you can optionally change it here
 
 `fillQuantity` and `fillTime` combined create a rate which is used to calculate both how many tokens to add at any given moment and how much time remains before a request can be fulfilled. I chose this approach since most of the time it's desirable to specify a rate limit in "X's per Y".
+
+#### shortlyOptions
+* **Promise**: the promise implementation to use
+* **limit**: the maximum number of items to enqueue. If the limit is exceeded, low priority items will be rejected with `Shortly.OverflowError`.
 
 ### #wait
 `shortly.wait([priority, [tokens]])`
