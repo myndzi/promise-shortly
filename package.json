@@ -25,9 +25,9 @@
   "homepage": "https://github.com/myndzi/promise-shortly#readme",
   "devDependencies": {
     "bluebird": "^3.7.2",
-    "mocha": "^8.2.1",
+    "mocha": "^9.1.3",
     "should": "^13.2.3",
-    "sinon": "^9.2.2"
+    "sinon": "^12.0.1"
   },
   "dependencies": {
     "create-error": "^0.3.1",
