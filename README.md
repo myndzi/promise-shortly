@@ -1,5 +1,7 @@
 # promise-shortly
 
+Typescript utility library to create promises that resolve according to a rate limit.
+
 Install:
 ```
 $ npm install --save promise-shortly
@@ -7,38 +9,37 @@ $ npm install --save promise-shortly
 
 Example:
 ```js
-var Shortly = require('promise-shortly'),
-    Bluebird = require('bluebird');
+import { Shortly } from "promise-shortly";
 
-var wait = new Shortly({
+const wait = new Shortly(
+  {
     capacity: 10,
     fillQuantity: 1,
     fillTime: 1000,
-    initialCapacity: 1
-}, {
-    Promise: Bluebird,
-    limit: 2
-}).wait;
+    initialCapacity: 1,
+  },
+  {
+    limit: 2,
+  }
+).wait;
 
-var start = Date.now();
-function numSeconds() {
-    return Math.round((Date.now() - start) / 1000);
-}
+const start = Date.now();
+const numSeconds = () => Math.round((Date.now() - start) / 1000);
 
-wait().then(function () {
-    console.log('default, completed after '+numSeconds()+'s');
+wait().then(() => {
+  console.log("default, completed after " + numSeconds() + "s");
 });
 
-wait(0, 3).catch(function () {
-    console.log('low priority, rejected (over limit)');
+wait({ priority: 0 }).catch(() => {
+  console.log("low priority, rejected (over limit)");
 });
 
-wait(5, 3).then(function () {
-    console.log('middle priority, completed after '+numSeconds()+'s');
+wait({ priority: 5, tokens: 3 }).then(() => {
+  console.log("middle priority, completed after " + numSeconds() + "s");
 });
 
-wait(10, 1).then(function () {
-    console.log('high priority, completed after '+numSeconds()+'s');
+wait({ priority: 10, tokens: 1 }).then(() => {
+  console.log("high priority, completed after " + numSeconds() + "s");
 });
 ```
 
@@ -66,20 +67,19 @@ Options for the token bucket are passed directly to [simple-token-bucket#options
 `fillQuantity` and `fillTime` combined create a rate which is used to calculate both how many tokens to add at any given moment and how much time remains before a request can be fulfilled. I chose this approach since most of the time it's desirable to specify a rate limit in "X's per Y".
 
 #### shortlyOptions
-* **Promise**: the promise implementation to use
-* **limit**: the maximum number of items to enqueue. If the limit is exceeded, low priority items will be rejected with `Shortly.OverflowError`.
+* **limit**: the maximum number of items to enqueue. If the limit is exceeded, low priority items will be rejected with a `BucketOverflowError`.
 
 ### #wait
-`shortly.wait([priority, [tokens]])`
-Arguments are optional. Requests are sorted by priority first and tokens second. *High* priority values trump low priority values, while *low* token counts trump *high* token counts. Priority only affects queueing, so a low priority request may execute while a high priority request gets queued, *if* the low priority request can be executed immediately.
+`shortly.wait({priority: number, tokens: number})`
+Arguments are optional. Requests are sorted by priority first and tokens second. *High* priority values trump low priority values, while *low* token counts trump *high* token counts.
 
 ## What
 `promise-shortly` is a promise-based rate limiter with prioritization and a simple API. You set it up, then any time you want to wait on the rate limit, just call `wait()`. It allows for prioritization so that certain promises can jump the queue, and you may specify the "weight" of a request in tokens, which has two effects:
-1. Requests with fewer tokens will be resolved first is the same priority class
+1. Requests with fewer tokens will be resolved first in the same priority class
 2. Requests specifying other than the default 1 token will cause that amount of tokens to be removed from the backing token bucket implementation; in effect, a request of 3 tokens will take 3 times as long to recover from than a request of 1 token.
 
 ## How
-`promise-shortly` utilizes [simple-token-bucket](https://www.npmjs.com/package/simple-token-bucket) and [heap](https://www.npmjs.com/package/heap) and ties them together to provide a convenient API. The token bucket guides whether a request can be satisfied; if it cannot, a timeout is utilized to resolve it at the first opportunity. New requests may alter this, of course.
+`promise-shortly` utilizes [simple-token-bucket](https://www.npmjs.com/package/simple-token-bucket) and [@datastructures-js/priority-queue](https://www.npmjs.com/package/@datastructures-js/priority-queue) and ties them together to provide a convenient API. The token bucket guides whether a request can be satisfied; if it cannot, a timeout is utilized to resolve it at the first opportunity. New requests may alter this, of course.
 
 ## Why
 `promise-shortly` provides a simple API that doesn't rely on coupling its implementation with yours. Anywhere you can resolve a promise, you can delay based on a rate limit.
